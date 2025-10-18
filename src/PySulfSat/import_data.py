@@ -123,10 +123,16 @@ def import_data(filename, sheet_name=None, Petrolog=False, MELTS=False, MELTS_tx
         my_input = pd.read_csv(filename)
 
     if Petrolog is True:
-
-        df=pd.read_excel(filename, sheet_name='Petrolog_Output_FRAC')
+        if 'xlsx' in filename:
+            df=pd.read_excel(filename, sheet_name='Petrolog_Output_FRAC')
+        else:
+            df = my_input
         df.columns= df.columns.str.replace(' ','',regex=True)
+        df.columns = df.columns.str.replace('_wt%','', regex=True)
+
         df.columns= df.columns.str.replace('_melt','_Liq',regex=True)
+        print(df.columns[60])    
+
         if sum(df.columns.str.contains('Ni_Liq'))>0:
             df['Ni_Liq_ppm']=df['Ni_Liq']
         else:
