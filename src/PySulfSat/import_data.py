@@ -79,7 +79,7 @@ def import_dataframe(df, suffix=None):
 
 
 
-def import_data(filename, sheet_name=None, Petrolog=False, MELTS=False, MELTS_txt=False, suffix=None):
+def import_data(filename, sheet_name=None, Petrolog3=False, Petrolog4=False ,MELTS=False, MELTS_txt=False, suffix=None):
     """ This function takes a user input, and reforms the columns into the format required by PySulfSat,
     In many cases this involves renaming columns to get into the format SiO2_Liq, TiO2_Liq, etc
 
@@ -89,8 +89,11 @@ def import_data(filename, sheet_name=None, Petrolog=False, MELTS=False, MELTS_tx
         File name (e.g. 'Test1.xlsx')
 
 
-    Petrolog: bool
+    Petrolog3: bool
         True if output from Petrolog3 software, False (default) if not
+
+    Petrolog4: bool
+        True if output from Petrolog4 software, False (default) if not    
 
     MELTS: bool
         True if loading a MELTS tbl file, that is, a file that ends in .tbl
@@ -121,17 +124,42 @@ def import_data(filename, sheet_name=None, Petrolog=False, MELTS=False, MELTS_tx
 
     if 'csv' in filename:
         my_input = pd.read_csv(filename)
+    
+    if Petrolog3 is True:
 
-    if Petrolog is True:
+        df=pd.read_excel(filename, sheet_name='Petrolog_Output_FRAC')
+        df.columns= df.columns.str.replace(' ','',regex=True)
+        df.columns= df.columns.str.replace('_melt','_Liq',regex=True)
+        if sum(df.columns.str.contains('Ni_Liq'))>0:
+            df['Ni_Liq_ppm']=df['Ni_Liq']
+        else:
+            df['Ni_Liq_ppm']=0
+            print('We didnt find a Ni column in your Petrolog input')
+
+        if sum(df.columns.str.contains('Cu_Liq'))>0:
+            df['Cu_Liq_ppm']=df['Cu_Liq']
+        else:
+            df['Cu_Liq_ppm']=0
+            print('We didnt find a Ni column in your Petrolog input')
+
+        df['FeOt_Liq']=df['FeO_Liq']+df['Fe2O3_Liq']*0.89998
+        df['Fe3Fet_Liq']=1-(df['FeO_Liq']/df['FeOt_Liq'])
+        df2=df.drop(['FeO_Liq', 'Fe2O3_Liq'], axis=1)
+        df2['T_K']=df2['Temperature']+273.15
+        df2['P_kbar']=df2['Pressure(kbar)']
+
+        if 'Melt_%_magma' in df2.columns:
+            df2['Fraction_melt'] = df2['Melt_%_magma'] / 100
+        my_input=df2
+
+    if Petrolog4 is True:
         if 'xlsx' in filename:
             df=pd.read_excel(filename, sheet_name='Petrolog_Output_FRAC')
         else:
             df = my_input
         df.columns= df.columns.str.replace(' ','',regex=True)
         df.columns = df.columns.str.replace('_wt%','', regex=True)
-
         df.columns= df.columns.str.replace('_melt','_Liq',regex=True)
-        print(df.columns[60])    
 
         if sum(df.columns.str.contains('Ni_Liq'))>0:
             df['Ni_Liq_ppm']=df['Ni_Liq']
