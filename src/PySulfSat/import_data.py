@@ -159,6 +159,7 @@ def import_data(filename, sheet_name=None, Petrolog3=False, Petrolog4=False ,MEL
             df = my_input
         df.columns= df.columns.str.replace(' ','',regex=True)
         df.columns = df.columns.str.replace('_wt%','', regex=True)
+        df.columns = df.columns.str.replace('_ppm','', regex=True)
         df.columns= df.columns.str.replace('_melt','_Liq',regex=True)
 
         if sum(df.columns.str.contains('Ni_Liq'))>0:
