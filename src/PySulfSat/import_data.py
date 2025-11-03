@@ -154,7 +154,7 @@ def import_data(filename, sheet_name=None, Petrolog3=False, Petrolog4=False ,MEL
 
     if Petrolog4 is True:
         if 'xlsx' in filename:
-            df=pd.read_excel(filename, sheet_name='Petrolog_Output_FRAC')
+            df=pd.read_excel(filename, sheet_name='Ptl_Otpt_FRAC__')
         else:
             df = my_input
         df.columns= df.columns.str.replace(' ','',regex=True)
